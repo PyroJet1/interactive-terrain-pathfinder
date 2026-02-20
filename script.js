@@ -16,7 +16,25 @@ function draw(){
     for (let x = 0; x < gridWidth; x++){
         for (let y = 0; y < gridHeight; y++){
             const noiseValue = noise(x * zoomFactor, y * zoomFactor);
-            fill(255 * noiseValue);
+            
+            let terrainColor;
+            if (noiseValue < 0.4){
+                terrainColor = color(64, 123, 158);
+            }
+            else if (noiseValue < 0.5){
+                terrainColor = color(238, 214, 175);
+            }
+            else if (noiseValue < 0.65){
+                terrainColor = color(139, 172, 120);
+            }
+            else if (noiseValue < 0.8){
+                terrainColor = color(169, 157, 144);
+            }
+            else{
+                terrainColor = color(255,255,255);
+            }
+
+            fill(terrainColor);
             noStroke();
             rect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
         }
