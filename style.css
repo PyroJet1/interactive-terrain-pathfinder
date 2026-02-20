@@ -1,0 +1,22 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+#map {
+    display: block;
+}
+
+#regenerate {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
