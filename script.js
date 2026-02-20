@@ -64,7 +64,10 @@ function dijkstras(sourceX, sourceY){
             {x: x+1, y: y},
             {x: x, y: y-1},
             {x: x, y: y+1},
-            
+            {x: x-1, y: y-1},
+            {x: x+1, y: y-1},
+            {x: x-1, y: y+1},
+            {x: x+1, y: y+1}
         ];
 
         neighbors.forEach(neighbor => {
@@ -130,18 +133,16 @@ function drawPath(targetX, targetY){
     strokeWeight(4);
     noFill();
 
+    beginShape();
     while (current != null){
-        // Draw a rectangle starting at the top-left corner of the cell
-        rect(
-            current.x * cellWidth, 
-            current.y * cellHeight, 
-            cellWidth, 
-            cellHeight
+        vertex(
+            current.x * cellWidth + cellWidth / 2, 
+            current.y * cellHeight + cellHeight / 2
         );
         
-        // Move to the next breadcrumb
         current = predecessors[current.x][current.y];
     }
+    endShape();
 }
 
 window.draw = function draw(){
@@ -180,7 +181,7 @@ window.mouseClicked = function mouseClicked(){
             sourcePoint = {x: gridX, y: gridY};
             pathData = dijkstras(gridX, gridY);
         }
-        else if (!destLocked){
+        else{
             destPoint = {x: gridX, y: gridY};
             destLocked = true;
             console.log("DestPoint:", gridX, " ", gridY);
