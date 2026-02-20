@@ -60,14 +60,14 @@ function dijkstras(sourceX, sourceY){
         if (dist > distances[x][y]) continue;
 
         const neighbors = [
-            {x: x-1, y: y},
-            {x: x+1, y: y},
-            {x: x, y: y-1},
-            {x: x, y: y+1},
-            {x: x-1, y: y-1},
-            {x: x+1, y: y-1},
-            {x: x-1, y: y+1},
-            {x: x+1, y: y+1}
+            {x: x-1, y: y, weight: 1},
+            {x: x+1, y: y, weight: 1},
+            {x: x, y: y-1, weight: 1},
+            {x: x, y: y+1, weight: 1},
+            {x: x-1, y: y-1, weight: 1.4},
+            {x: x+1, y: y-1, weight: 1.4},
+            {x: x-1, y: y+1, weight: 1.4},
+            {x: x+1, y: y+1, weight: 1.4}
         ];
 
         neighbors.forEach(neighbor => {
@@ -75,7 +75,7 @@ function dijkstras(sourceX, sourceY){
             let ny = neighbor.y;
 
             if (nx >= 0 && nx < gridWidth && ny >= 0 && ny < gridHeight){
-                let newDist = distances[x][y] + terrainGrid[nx][ny].terrain.cost;
+                let newDist = distances[x][y] + (terrainGrid[nx][ny].terrain.cost * neighbor.weight);
 
                 if (newDist < distances[nx][ny]){
                     distances[nx][ny] = newDist;
