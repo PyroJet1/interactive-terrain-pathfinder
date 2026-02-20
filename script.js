@@ -1,7 +1,7 @@
-let gridWidth = 200;
-let gridHeight = 150;
+let gridWidth = 400;
+let gridHeight = 300;
 let cellWidth, cellHeight;
-let zoomFactor = 0.05;
+let zoomFactor = 0.04;
 
 let WATER, SHORE, GRASS, MOUNTAIN, SNOW; 
 
@@ -36,9 +36,28 @@ function draw(){
     
     for (let x = 0; x < gridWidth; x++){
         for (let y = 0; y < gridHeight; y++){
+
             const noiseValue = noise(x * zoomFactor, y * zoomFactor);
             const terrainData = getTerrainType(noiseValue);
-            fill(terrainData.terrain.getColor(noiseValue, terrainData.min, terrainData.max));
+            
+            const right = x < gridWidth-1 ? noise((x+1) * zoomFactor, y * zoomFactor) : noiseValue;
+            const down = y < gridHeight-1 ? noise(x * zoomFactor, (y+1) * zoomFactor) : noiseValue;
+            
+            const slopeX = noiseValue - right;
+            const slopeY = noiseValue - down;
+            const slope = slopeX + slopeY;
+            
+            const lighting = map(slope, -0.3, 0.3, 0.4, 1.6);
+            const constrainedLighting = constrain(lighting, 0.4, 1.6);
+            
+            let terrainColor = terrainData.terrain.getColor(noiseValue, terrainData.min, terrainData.max);
+            
+            fill(
+                red(terrainColor) * constrainedLighting, 
+                green(terrainColor) * constrainedLighting, 
+                blue(terrainColor) * constrainedLighting
+            );
+            
             noStroke();
             rect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
         }
