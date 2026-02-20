@@ -1,15 +1,27 @@
-const canvas = document.getElementById('map');
-const ctx = canvas.getContext('2d');
-const regenerateBtn = document.getElementById('regenerate');
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function setup(){
+    createCanvas(600,600);
+    background(200);
+    noLoop();
+}
 
-regenerateBtn.addEventListener('click', () => {
-});
+function draw(){
+    for (x = 0; x < width; x++){
+        for (y = 0; y < height; y++){
+            set(x,y, color(255*Math.random()));
+        }
+    }
+    updatePixels();
+}
 
-canvas.addEventListener('click', (e) => {
-});
+function mouseClicked(){
 
-canvas.addEventListener('mousemove', (e) => {
-});
+}
+
+function mouseMoved(){
+
+}
+
+// function regenerateMap() {
+//   redraw();
+// }
