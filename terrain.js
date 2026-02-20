@@ -1,5 +1,5 @@
 
-class Terrain {
+export class Terrain {
     constructor(name, baseColor, cost){
         this.name = name;
         this.baseColor = baseColor;

@@ -1,3 +1,6 @@
+import TinyQueue from './node_modules/tinyqueue/index.js';
+import { Terrain } from './terrain.js'
+
 let gridWidth = 200;
 let gridHeight = 150;
 let cellWidth, cellHeight;
@@ -9,13 +12,15 @@ let destPoint = null
 let WATER, SHORE, GRASS, MOUNTAIN, SNOW;
 let terrainLayer;
 let destLocked;
+let terrainGrid = Array(gridWidth).fill(null).map(() => Array(gridHeight));
 
-function setup(){
+
+window.setup = function setup(){
     createCanvas(windowWidth, windowHeight);
     cellWidth = width / gridWidth;
     cellHeight = height / gridHeight;
 
-    noiseDetail(7, 0.5)
+    noiseDetail(7, 0.5);
 
     WATER = new Terrain('water', color(64, 123, 158), 10);
     SHORE = new Terrain('shore', color(238, 214, 175), 2);
@@ -28,8 +33,6 @@ function setup(){
 
     background(200);
     loop();
-
-    console.log('Terrain initialized:', WATER, SHORE, GRASS, MOUNTAIN, SNOW);
 }
 
 function getTerrainType(noiseValue) {
@@ -40,13 +43,58 @@ function getTerrainType(noiseValue) {
     return {terrain: SNOW, min: 0.8, max: 1.0};
 }
 
+function dijkstras(sourceX, sourceY){
+    let distances = Array(gridWidth).fill(null).map(() => Array(gridHeight).fill(Infinity));
+    let predecessors = Array(gridWidth).fill(null).map(() => Array(gridHeight).fill(null));
+
+    distances[sourceX][sourceY] = 0;
+
+    let pq = new TinyQueue([], (a,b) => a.dist - b.dist);
+    pq.push({x: sourceX, y: sourceY, dist: 0});
+
+    while (pq.length > 0){
+        let current = pq.pop();
+        let {x, y, dist} = current;
+
+        if (dist > distances[x][y]) continue;
+
+        const neighbors = [
+            {x: x-1, y: y},
+            {x: x+1, y: y},
+            {x: x, y: y-1},
+            {x: x, y: y+1}
+        ];
+
+        neighbors.forEach(neighbor => {
+            let nx = neighbor.x;
+            let ny = neighbor.y;
+
+            if (nx >= 0 && nx < gridWidth && ny >= 0 && ny < gridHeight){
+                let newDist = distances[x][y] + terrainGrid[nx][ny].terrain.cost;
+
+                if (newDist < distances[nx][ny]){
+                    distances[nx][ny] = newDist;
+                    predecessors[nx][ny] = {x,y};
+                    pq.push({x: nx, y: ny, dist: newDist});
+                }
+            }
+        });
+    }
+
+    console.log('DijkstraDONE!')
+    return {distances, predecessors};
+}
+
 function drawTerrain(){
+
     for (let x = 0; x < gridWidth; x++){
         for (let y = 0; y < gridHeight; y++){
 
             const noiseValue = noise(x * zoomFactor, y * zoomFactor);
             const terrainData = getTerrainType(noiseValue);
-            
+
+            terrainGrid[x][y] = terrainData;
+
             const right = x < gridWidth-1 ? noise((x+1) * zoomFactor, y * zoomFactor) : noiseValue;
             const down = y < gridHeight-1 ? noise(x * zoomFactor, (y+1) * zoomFactor) : noiseValue;
             
@@ -72,8 +120,7 @@ function drawTerrain(){
     }
 }
 
-function draw(){
-    
+window.draw = function draw(){
     image(terrainLayer, 0, 0);
 
     if (sourcePoint){
@@ -96,13 +143,14 @@ function drawMarker(gridX, gridY, markerColor){
     );
 }
 
-function mouseClicked(){
+window.mouseClicked = function mouseClicked(){
     let gridX = floor(mouseX / cellWidth);
     let gridY = floor(mouseY / cellHeight);
 
     if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight){
         if(sourcePoint == null){
             sourcePoint = {x: gridX, y: gridY};
+            dijkstras(gridX, gridY);
         }
         else{
             destPoint = {x: gridX, y: gridY};
@@ -113,7 +161,7 @@ function mouseClicked(){
     
 }
 
-function mouseMoved(){
+window.mouseMoved = function mouseMoved(){
     if (sourcePoint && !destLocked) {
         let gridX = floor(mouseX / cellWidth);
         let gridY = floor(mouseY / cellHeight);
