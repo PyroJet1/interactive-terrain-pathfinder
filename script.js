@@ -13,6 +13,7 @@ let WATER, SHORE, GRASS, MOUNTAIN, SNOW;
 let terrainLayer;
 let destLocked;
 let terrainGrid = Array(gridWidth).fill(null).map(() => Array(gridHeight));
+let pathData = null;
 
 
 window.setup = function setup(){
@@ -62,7 +63,8 @@ function dijkstras(sourceX, sourceY){
             {x: x-1, y: y},
             {x: x+1, y: y},
             {x: x, y: y-1},
-            {x: x, y: y+1}
+            {x: x, y: y+1},
+            
         ];
 
         neighbors.forEach(neighbor => {
@@ -120,8 +122,34 @@ function drawTerrain(){
     }
 }
 
+function drawPath(targetX, targetY){
+    let current = {x: targetX, y: targetY}
+    let { predecessors } = pathData;
+
+    stroke(255,255,0, 150);
+    strokeWeight(4);
+    noFill();
+
+    while (current != null){
+        // Draw a rectangle starting at the top-left corner of the cell
+        rect(
+            current.x * cellWidth, 
+            current.y * cellHeight, 
+            cellWidth, 
+            cellHeight
+        );
+        
+        // Move to the next breadcrumb
+        current = predecessors[current.x][current.y];
+    }
+}
+
 window.draw = function draw(){
     image(terrainLayer, 0, 0);
+
+    if (destPoint && pathData){
+        drawPath(destPoint.x, destPoint.y)
+    }
 
     if (sourcePoint){
         drawMarker(sourcePoint.x, sourcePoint.y, color(255,0,0));
@@ -150,9 +178,9 @@ window.mouseClicked = function mouseClicked(){
     if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight){
         if(sourcePoint == null){
             sourcePoint = {x: gridX, y: gridY};
-            dijkstras(gridX, gridY);
+            pathData = dijkstras(gridX, gridY);
         }
-        else{
+        else if (!destLocked){
             destPoint = {x: gridX, y: gridY};
             destLocked = true;
             console.log("DestPoint:", gridX, " ", gridY);
