@@ -1,25 +1,32 @@
+let gridWidth = 200;
+let gridHeight = 150;
+let cellWidth, cellHeight;
+let zoomFactor = 0.05;
 
 function setup(){
-    createCanvas(600,600);
+    createCanvas(windowWidth, windowHeight);
+    cellWidth = width / gridWidth;
+    cellHeight = height / gridHeight;
     background(200);
     noLoop();
+    redraw();
 }
 
 function draw(){
-    for (x = 0; x < width; x++){
-        for (y = 0; y < height; y++){
-            set(x,y, color(255*Math.random()));
+    for (let x = 0; x < gridWidth; x++){
+        for (let y = 0; y < gridHeight; y++){
+            const noiseValue = noise(x * zoomFactor, y * zoomFactor);
+            fill(255 * noiseValue);
+            noStroke();
+            rect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
         }
     }
-    updatePixels();
 }
 
 function mouseClicked(){
-
 }
 
 function mouseMoved(){
-
 }
 
 // function regenerateMap() {
