@@ -1,5 +1,5 @@
-import TinyQueue from './node_modules/tinyqueue/index.js';
-import { Terrain } from './terrain.js'
+import TinyQueue from 'tinyqueue';
+import { Terrain } from './terrain.js';
 
 let gridWidth = 200;
 let gridHeight = 150;
