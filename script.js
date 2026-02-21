@@ -14,6 +14,7 @@ let terrainLayer;
 let destLocked;
 let terrainGrid = Array(gridWidth).fill(null).map(() => Array(gridHeight));
 let pathData = null;
+let terrainOpacity = 0;
 
 
 window.setup = function setup(){
@@ -32,7 +33,8 @@ window.setup = function setup(){
     terrainLayer = createGraphics(width, height);
     drawTerrain();
 
-    background(200);
+    document.getElementById('regenerate').addEventListener('click', regenerateMap);
+
     loop();
 }
 
@@ -42,6 +44,15 @@ function getTerrainType(noiseValue) {
     if (noiseValue < 0.65) return {terrain: GRASS, min: 0.5, max: 0.65};
     if (noiseValue < 0.8) return {terrain: MOUNTAIN, min: 0.65, max: 0.8};
     return {terrain: SNOW, min: 0.8, max: 1.0};
+}
+
+function regenerateMap(){
+    noiseSeed(Math.random() * 10000);
+    drawTerrain();
+    sourcePoint = null;
+    destPoint = null;
+    destLocked = false;
+    pathData = null;
 }
 
 function dijkstras(sourceX, sourceY){
@@ -129,7 +140,7 @@ function drawPath(targetX, targetY){
     let current = {x: targetX, y: targetY}
     let { predecessors } = pathData;
 
-    stroke(255,255,0, 150);
+    stroke(0,0,255,150);
     strokeWeight(4);
     noFill();
 
@@ -146,7 +157,14 @@ function drawPath(targetX, targetY){
 }
 
 window.draw = function draw(){
+
+    if (terrainOpacity < 255) {
+        terrainOpacity += 5;
+    }
+    
+    tint(255, terrainOpacity);
     image(terrainLayer, 0, 0);
+    noTint();
 
     if (destPoint && pathData){
         drawPath(destPoint.x, destPoint.y)
@@ -173,6 +191,12 @@ function drawMarker(gridX, gridY, markerColor){
 }
 
 window.mouseClicked = function mouseClicked(){
+
+    let clickedElement = document.elementFromPoint(mouseX, mouseY);
+    if (clickedElement && clickedElement.tagName === 'BUTTON') {
+        return;
+    }
+
     let gridX = floor(mouseX / cellWidth);
     let gridY = floor(mouseY / cellHeight);
 
