@@ -34,6 +34,9 @@ window.setup = function setup(){
     drawTerrain();
 
     document.getElementById('regenerate').addEventListener('click', regenerateMap);
+    document.getElementById('new-source').addEventListener('click', changeSource);
+    document.getElementById('new-dest').addEventListener('click', changeDest);
+
 
     loop();
 }
@@ -53,6 +56,18 @@ function regenerateMap(){
     destPoint = null;
     destLocked = false;
     pathData = null;
+}
+
+function changeSource(){
+    sourcePoint = null;
+    destPoint = null;
+    destLocked = false;
+    pathData = null;
+}
+
+function changeDest(){
+    destPoint = null;
+    destLocked = false;
 }
 
 function dijkstras(sourceX, sourceY){
@@ -205,7 +220,7 @@ window.mouseClicked = function mouseClicked(){
             sourcePoint = {x: gridX, y: gridY};
             pathData = dijkstras(gridX, gridY);
         }
-        else{
+        else if (!destLocked){
             destPoint = {x: gridX, y: gridY};
             destLocked = true;
             console.log("DestPoint:", gridX, " ", gridY);
