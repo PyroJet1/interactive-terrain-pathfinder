@@ -1,4 +1,7 @@
 ## How to run
+
+***Github Repo:*** https://github.com/PyroJet1/interactive-terrain-pathfinder
+
 ### Locally
 1. Download and extract the files.
 2. Open your command prompt and navigate to the file location

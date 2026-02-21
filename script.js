@@ -1,23 +1,27 @@
 import TinyQueue from 'tinyqueue';
 import { Terrain } from './terrain.js';
 
+//map dimensions
 let gridWidth = 200;
 let gridHeight = 150;
 let cellWidth, cellHeight;
 let zoomFactor = 0.04;
 
+//markers & Dijkstra Variables
 let sourcePoint = null
 let destPoint = null
+let destLocked;
+let pathData = null;
 
+//Terrain Variables
 let WATER, SHORE, GRASS, MOUNTAIN, SNOW;
 let terrainLayer;
-let destLocked;
 let terrainGrid = Array(gridWidth).fill(null).map(() => Array(gridHeight));
-let pathData = null;
 let terrainOpacity = 0;
 
 
 window.setup = function setup(){
+
     createCanvas(windowWidth, windowHeight);
     cellWidth = width / gridWidth;
     cellHeight = height / gridHeight;
@@ -42,6 +46,7 @@ window.setup = function setup(){
 }
 
 function getTerrainType(noiseValue) {
+
     if (noiseValue < 0.4) return {terrain: WATER, min: 0, max: 0.4};
     if (noiseValue < 0.5) return {terrain: SHORE, min: 0.4, max: 0.5};
     if (noiseValue < 0.65) return {terrain: GRASS, min: 0.5, max: 0.65};
@@ -50,6 +55,7 @@ function getTerrainType(noiseValue) {
 }
 
 function regenerateMap(){
+
     noiseSeed(Math.random() * 10000);
     drawTerrain();
     sourcePoint = null;
@@ -59,6 +65,7 @@ function regenerateMap(){
 }
 
 function changeSource(){
+    
     sourcePoint = null;
     destPoint = null;
     destLocked = false;
@@ -71,6 +78,8 @@ function changeDest(){
 }
 
 function dijkstras(sourceX, sourceY){
+
+    //initialize all neighbours to infinity
     let distances = Array(gridWidth).fill(null).map(() => Array(gridHeight).fill(Infinity));
     let predecessors = Array(gridWidth).fill(null).map(() => Array(gridHeight).fill(null));
 
@@ -96,6 +105,7 @@ function dijkstras(sourceX, sourceY){
             {x: x+1, y: y+1, weight: 1.4}
         ];
 
+        //evaluating cost for each neighbour
         neighbors.forEach(neighbor => {
             let nx = neighbor.x;
             let ny = neighbor.y;
@@ -103,6 +113,7 @@ function dijkstras(sourceX, sourceY){
             if (nx >= 0 && nx < gridWidth && ny >= 0 && ny < gridHeight){
                 let newDist = distances[x][y] + (terrainGrid[nx][ny].terrain.cost * neighbor.weight);
 
+                //relaxation of neighbours
                 if (newDist < distances[nx][ny]){
                     distances[nx][ny] = newDist;
                     predecessors[nx][ny] = {x,y};
@@ -121,11 +132,14 @@ function drawTerrain(){
     for (let x = 0; x < gridWidth; x++){
         for (let y = 0; y < gridHeight; y++){
 
+            //pearlin noise
             const noiseValue = noise(x * zoomFactor, y * zoomFactor);
             const terrainData = getTerrainType(noiseValue);
 
+            //saving data for dijkstras
             terrainGrid[x][y] = terrainData;
 
+            //shadows based on height
             const right = x < gridWidth-1 ? noise((x+1) * zoomFactor, y * zoomFactor) : noiseValue;
             const down = y < gridHeight-1 ? noise(x * zoomFactor, (y+1) * zoomFactor) : noiseValue;
             
@@ -151,7 +165,9 @@ function drawTerrain(){
     }
 }
 
+//creates line from source to destination
 function drawPath(targetX, targetY){
+
     let current = {x: targetX, y: targetY}
     let { predecessors } = pathData;
 
@@ -173,6 +189,7 @@ function drawPath(targetX, targetY){
 
 window.draw = function draw(){
 
+    //fade in effect on start
     if (terrainOpacity < 255) {
         terrainOpacity += 5;
     }
@@ -182,7 +199,7 @@ window.draw = function draw(){
     noTint();
 
     if (destPoint && pathData){
-        drawPath(destPoint.x, destPoint.y)
+        drawPath(destPoint.x, destPoint.y);
     }
 
     if (sourcePoint){
@@ -194,6 +211,7 @@ window.draw = function draw(){
 }
 
 function drawMarker(gridX, gridY, markerColor){
+
     fill(markerColor);
     stroke(255);
     strokeWeight(2);
@@ -207,6 +225,7 @@ function drawMarker(gridX, gridY, markerColor){
 
 window.mouseClicked = function mouseClicked(){
 
+    //prevents changing of destination when buttons are pressed
     let clickedElement = document.elementFromPoint(mouseX, mouseY);
     if (clickedElement && clickedElement.tagName === 'BUTTON') {
         return;
